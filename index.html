@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photo Album Organizer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        .photo {
+            display: inline-block;
+            margin: 10px;
+            border: 2px solid transparent;
+        }
+        .photo img {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+        }
+        .photo.selected {
+            border-color: #00f; 
+        }
+    </style>
+</head>
+<body>
+    <h1>Photo Album Organizer</h1>
+
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="text" name="album" placeholder="Album Name" required>
+        <input type="file" name="photos" multiple required>
+        <button type="submit">Upload Photos</button>
+    </form>
+
+    <div id="photoGallery">
+        {% for album in albums %}
+            <h2>{{ album.name }}</h2>
+            <div class="album">
+                {% for photo in album.photos %}
+                    <div class="photo" onclick="selectPhoto('{{ photo.filename }}', this)">
+                        <img src="{{ url_for('routes.uploaded_file', filename=photo.filename) }}" alt="{{ photo.filename }}">
+                    </div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <form id="editForm">
+        <input type="hidden" name="filename" id="selectedPhoto" required>
+        <select name="action" id="actionSelect" required>
+            <option value="crop">Crop</option>
+            <option value="rotate">Rotate</option>
+            <option value="brightness">Brightness</option>
+            <option value="delete">Delete</option> 
+        </select>
+        <input type="text" name="params" id="paramsInput" placeholder="Params (comma-separated)">
+        <button type="submit">Submit</button>
+    </form>    
+
+    <form id="deleteAlbumForm" method="POST" action="/delete/album">
+        <input type="text" name="album_name" placeholder="Album Name" required>
+        <button type="submit">Delete Album</button>
+    </form>
+
+    <form id="exportPdfForm" method="POST" action="/export/pdf">
+        <input type="text" name="album" placeholder="Album Name" required>
+        <select name="layout" required>
+            <option value="single">Single Photo per Page</option>
+            <option value="grid">Grid Layout</option>
+            <option value="mosaic">Mosaic Layout</option>
+        </select>
+        <button type="submit">Export as PDF</button>
+    </form>
+
+    <form id="exportVideoForm" method="POST" action="/export/video">
+        <input type="text" name="album" placeholder="Album Name" required>
+        <button type="submit">Create Video</button>
+    </form>
+    
+    <video id="videoOutput" style="display:none; margin-top: 20px;" width="640" height="360" controls>
+        <source id="videoSource" src="" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+    
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
+
